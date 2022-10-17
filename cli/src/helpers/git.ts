@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { execSync } from "child_process";
+import { exec, execSync } from "child_process";
 import { execa } from "execa";
 import fs from "fs-extra";
 import inquirer from "inquirer";
@@ -33,8 +33,8 @@ const isInsideGitRepo = (dir: string): boolean => {
   }
 };
 
-const getGitVersion = () => {
-  const stdout = execSync("git --version").toString().trim();
+const getGitVersion = async () => {
+  const stdout = exec("git --version").toString().trim();
   const gitVersionTag = stdout.split(" ")[2];
   const major = gitVersionTag?.split(".")[0];
   const minor = gitVersionTag?.split(".")[1];
@@ -98,7 +98,7 @@ export const initializeGit = async (projectDir: string) => {
   try {
     spinner.stop();
     // --initial-branch flag was added in git v2.28.0
-    const { major, minor } = getGitVersion();
+    const { major, minor } = await getGitVersion();
     if (major < 2 || minor < 28) {
       await execa("git", ["init"], { cwd: projectDir });
       await execa("git", ["branch", "-m", "main"], { cwd: projectDir });
